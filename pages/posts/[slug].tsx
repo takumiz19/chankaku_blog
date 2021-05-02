@@ -1,4 +1,4 @@
-import { createClient } from 'contentful'
+import { createClient, Entry } from 'contentful'
 import { NextPage, GetStaticProps } from 'next'
 
 const client = createClient({
@@ -12,9 +12,17 @@ const client = createClient({
 //   locale: string;
 // };
 
-type Props = {
-  page: any
+type Page = {
+  title: string
+  body: string
+  slug: string
 }
+
+type Props = {
+  page: Entry<Page>
+}
+
+
 async function getPage() {
   const query = {
     limit: 1,
@@ -27,15 +35,20 @@ async function getPage() {
 }
 
 export async function getStaticPaths() {
+  const page = await getPage() as Entry<Page>
+  // todo slugsのリストを取ってくる
   return {
     paths: [
       // String variant:
-      '/posts/test-1',
+      {
+        params: { slug: page.fields.slug }
+      }
     ],
-    fallback: true,
+    fallback: "blocking",
   }
 }
 
+// @ts-ignore
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const page = await getPage()
   return {
@@ -46,7 +59,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 
 // @ts-ignore
 const Page: NextPage<Props> = ({page}: Props) => {
-  console.log(JSON.stringify(page))
   return (
     <>
       <div>{page.fields.title}</div>
