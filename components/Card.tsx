@@ -1,5 +1,5 @@
-import React, {FC} from 'react'
-import styled from "styled-components"
+import React, { FC } from 'react'
+import styled from 'styled-components'
 
 interface Props {
   img: string
@@ -11,7 +11,7 @@ const Card: FC<Props> = (props) => {
   return (
     <CardContent className={props.className}>
       <EyeCatch>
-        <Img src={props.img} alt="hoge"/>
+        <Img src={props.img} alt="hoge" />
       </EyeCatch>
       <TitleArea>
         <Title>{props.title}</Title>
@@ -32,7 +32,7 @@ const CardContent = styled.div`
   width: 296px;
   height: 296px;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  transition: .3s;
+  transition: 0.3s;
   &:hover {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.25);
     transform: translateY(-8px);

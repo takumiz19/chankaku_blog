@@ -1,22 +1,27 @@
 import React from 'react'
-import {NextPage} from 'next'
+import { NextPage } from 'next'
 import Card from '~/components/Card'
-import styled from "styled-components"
+import styled from 'styled-components'
 
 const Home: NextPage = (props) => {
   return (
     <Index>
-      {[1,2,3,4,5].map(el => {
-        return <StyledCard img="https://www.tsuzukiblog.org/wp-content/uploads/2020/03/shutterstock_1005938026.jpg" title="hogehoge" key={el} />
+      {[1, 2, 3, 4, 5].map((el) => {
+        return (
+          <StyledCard
+            img="https://www.tsuzukiblog.org/wp-content/uploads/2020/03/shutterstock_1005938026.jpg"
+            title="hogehoge"
+            key={el}
+          />
+        )
       })}
     </Index>
   )
 }
 
 export const getStaticProps = async () => {
-
   return {
-    props: { },
+    props: {},
     revalidate: 1,
   }
 }
