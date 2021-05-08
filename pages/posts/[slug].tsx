@@ -1,82 +1,48 @@
-import { createClient  } from 'contentful'
+import { createClient } from 'contentful'
 import { NextPage, GetStaticProps } from 'next'
+import { getSlugs, getPage } from '~/services/contentful'
+import DetailPage from '~/components/DetailPage'
 
 const client = createClient({
-  space: process.env.SPACE_ID!, // ID of a Compose-compatible space to be used \
-  accessToken: process.env.ACCESS_TOKEN!, // delivery API key for the space \
+    space: process.env.NEXT_PUBLIC_SPACE_ID!, // ID of a Compose-compatible space to be used \
+    accessToken: process.env.NEXT_PUBLIC_ACCESS_TOKEN!, // delivery API key for the space \
 })
 
-type Page = {
-  title: string
-  body: string
-  slug: string
+type Post = {
+    title: string
+    body: string
+    slug: string
 }
 
 type Props = {
-  slug: string
+    post: Post
 }
 
-async function getPage(slug: string) {
-  const query = {
-    content_type: 'blogPost',
-    limit: 1,
-    'fields.slug': slug,
-  }
-  const {
-    items: [page],
-  } = await client.getEntries(query)
-  return page || null
+export const getStaticPaths = async () => {
+    const slugs = await getSlugs(client)
+    return {
+        // @ts-ignore
+        paths: slugs.map(({ slug }) => `/posts/${slug}`),
+        fallback: 'blocking',
+    }
 }
 
 // @ts-ignore
-const parsePostSlug = ({ fields }) => {
-  return {
-    slug: fields.slug,
-  };
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+    const post = await getPage(client, params?.slug as string)
+    return {
+        props: { post },
+        revalidate: 100,
+    }
 }
 
 // @ts-ignore
-const parsePostSlugEntries = (entries) =>  {
-  // @ts-ignore
-  return entries?.items?.map( (post) => post.fields);
-}
-
-const getSlugs = async () => {
-  const entries =  await client.getEntries({
-    content_type: "blogPost",
-    
-    // postのslugの値を取得
-    select: "fields.slug",
-  });
-
-  return parsePostSlugEntries(entries,);
-}
-
-export async function getStaticPaths() {
-  const slugs = await getSlugs()
-  return {
-      // @ts-ignore
-    paths: slugs.map(slug => `/posts/${slug.slug}`),
-    fallback: 'blocking',
-  }
-}
-
-// @ts-ignore
-export const getStaticProps: GetStaticProps<Props> = async () => {
-  const slugs = await getSlugs()
-  return {
-    props: { slugs },
-    revalidate: 1,
-  }
-}
-
-// @ts-ignore
-const Page: NextPage<Props> = ({ slug }: Props) => {
-  return (
-    <>
-      <div>{slug}</div>
-    </>
-  )
+const Page: NextPage<Props> = ({ post }: Props) => {
+    return (
+        <>
+            <DetailPage post={post} />
+        </>
+    )
 }
 
 export default Page
