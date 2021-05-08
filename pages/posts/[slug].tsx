@@ -1,16 +1,10 @@
-import { createClient, Entry } from 'contentful'
+import { createClient  } from 'contentful'
 import { NextPage, GetStaticProps } from 'next'
 
 const client = createClient({
   space: process.env.SPACE_ID!, // ID of a Compose-compatible space to be used \
   accessToken: process.env.ACCESS_TOKEN!, // delivery API key for the space \
-});
-
-// type GetPageParams = {
-//   pageContentType: string;
-//   slug: string;
-//   locale: string;
-// };
+})
 
 type Page = {
   title: string
@@ -19,50 +13,68 @@ type Page = {
 }
 
 type Props = {
-  page: Entry<Page>
+  slug: string
 }
 
-
-async function getPage() {
+async function getPage(slug: string) {
   const query = {
-    limit: 1,
-    include: 10,
-    'fields.slug': 'test-1',
     content_type: 'blogPost',
+    limit: 1,
+    'fields.slug': slug,
+  }
+  const {
+    items: [page],
+  } = await client.getEntries(query)
+  return page || null
+}
+
+// @ts-ignore
+const parsePostSlug = ({ fields }) => {
+  return {
+    slug: fields.slug,
   };
-  const { items: [page] } = await client.getEntries(query);
-  return page || null;
+}
+
+// @ts-ignore
+const parsePostSlugEntries = (entries) =>  {
+  // @ts-ignore
+  return entries?.items?.map( (post) => post.fields);
+}
+
+const getSlugs = async () => {
+  const entries =  await client.getEntries({
+    content_type: "blogPost",
+    
+    // postのslugの値を取得
+    select: "fields.slug",
+  });
+
+  return parsePostSlugEntries(entries,);
 }
 
 export async function getStaticPaths() {
-  const page = await getPage() as Entry<Page>
-  // todo slugsのリストを取ってくる
+  const slugs = await getSlugs()
   return {
-    paths: [
-      // String variant:
-      {
-        params: { slug: page.fields.slug }
-      }
-    ],
-    fallback: "blocking",
+      // @ts-ignore
+    paths: slugs.map(slug => `/posts/${slug.slug}`),
+    fallback: 'blocking',
   }
 }
 
 // @ts-ignore
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const page = await getPage()
+  const slugs = await getSlugs()
   return {
-    props: { page },
+    props: { slugs },
     revalidate: 1,
   }
 }
 
 // @ts-ignore
-const Page: NextPage<Props> = ({page}: Props) => {
+const Page: NextPage<Props> = ({ slug }: Props) => {
   return (
     <>
-      <div>{page.fields.title}</div>
-      <div>{page.fields.body}</div>
+      <div>{slug}</div>
     </>
   )
 }
