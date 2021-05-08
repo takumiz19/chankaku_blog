@@ -10,7 +10,11 @@ const client = createClient({
     accessToken: process.env.NEXT_PUBLIC_ACCESS_TOKEN!, // delivery API key for the space \
 })
 
-const Home: NextPage = ({pages}) => {
+type Props = {
+    pages: any
+}
+
+const Home: NextPage<Props> = ({ pages }: Props) => {
     return (
         <Index>
             {pages.map((page: any) => {
@@ -28,6 +32,8 @@ const Home: NextPage = ({pages}) => {
     )
 }
 
+export default Home
+
 export const getStaticProps = async () => {
     const pages = await getAllPage(client)
     return {
@@ -35,8 +41,6 @@ export const getStaticProps = async () => {
         revalidate: 1,
     }
 }
-
-export default Home
 
 const Index = styled.div`
     display: flex;

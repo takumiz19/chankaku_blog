@@ -36,7 +36,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     }
 }
 
-// @ts-ignore
 const Page: NextPage<Props> = ({ post }: Props) => {
     return (
         <>
